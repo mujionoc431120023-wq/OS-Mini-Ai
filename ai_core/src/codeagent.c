@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "../include/ai_hub.h"
 
 /* Analyze coding task and provide response */

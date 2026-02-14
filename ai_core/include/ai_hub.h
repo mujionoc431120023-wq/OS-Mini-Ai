@@ -12,6 +12,7 @@
    - IoT Smart Home Control
    - Cloud Sync (Dormant)
    - OTA Updates (Dormant)
+   - Self-Repair System (NEW)
    ============================================================ */
 
 #ifndef AI_HUB_H
@@ -153,6 +154,68 @@ int ai_codeagent_debug(const char *code, const char *error, char *fix);
 int ai_codeagent_review(const char *code, char *review);
 int ai_codeagent_optimize(const char *code, char *optimized);
 int ai_codeagent_explain(const char *code, char *explanation);
+
+/* ============================================================
+   SELF-REPAIR SYSTEM - Automatic Bug Fixing
+   ============================================================ */
+
+/* Error severity levels */
+#define SELF_REPAIR_INFO      1
+#define SELF_REPAIR_WARNING   2
+#define SELF_REPAIR_ERROR     3
+#define SELF_REPAIR_CRITICAL  4
+
+/* Health report structure */
+typedef struct {
+    int memory_ok;
+    int disk_ok;
+    int ai_modules_ok;
+    int persistence_ok;
+    int blackbox_ok;
+    int last_error_count;
+    int last_repair_count;
+    float health_score;
+} health_report_t;
+
+/* Initialize self-repair system */
+void ai_self_repair_init(void);
+
+/* Log an error */
+void ai_self_repair_log_error(const char *category, const char *error_msg, 
+                               const char *context, int severity);
+
+/* Analyze error using AI */
+void ai_self_repair_analyze_error(int error_id, char *analysis, size_t len);
+
+/* Auto-fix an error */
+int ai_self_repair_auto_fix(int error_id);
+
+/* Manual fix */
+int ai_self_repair_manual_fix(int error_id, const char *custom_fix);
+
+/* Health check */
+void ai_self_repair_health_check(health_report_t *report);
+
+/* Get health status */
+void ai_self_repair_get_health_status(char *status, size_t len);
+
+/* Run diagnostics */
+void ai_self_repair_run_diagnostics(char *output, size_t len);
+
+/* Restore from backup */
+int ai_self_repair_restore_backup(void);
+
+/* Clear error log */
+void ai_self_repair_clear_errors(void);
+
+/* Get error count */
+int ai_self_repair_get_error_count(void);
+
+/* Get unfixed count */
+int ai_self_repair_get_unfixed_count(void);
+
+/* Simulate error for testing */
+void ai_self_repair_simulate_error(const char *category, const char *msg);
 
 /* ============================================================
    MAIN HUB FUNCTION

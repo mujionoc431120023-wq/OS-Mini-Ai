@@ -1,9 +1,10 @@
 /* ============================================================
-   FUZZY LOGIC - Anti-Typo System
-   Uses Levenshtein Distance algorithm for fuzzy matching
+   FUZZY LOGIC - Anti-Typo System (ENHANCED)
+   Uses Levenshtein Distance algorithm with optimization
    ============================================================ */
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "../include/ai_hub.h"
 
 /* Calculate minimum of three values */
@@ -11,60 +12,85 @@
 
 /* Calculate Levenshtein distance between two strings */
 int ai_fuzzy_distance(const char *s1, const char *s2) {
-    int x, y, s1len, s2len;
-    s1len = strlen(s1);
-    s2len = strlen(s2);
+    if (!s1 || !s2) return -1;
+    
+    int s1len = (int)strlen(s1);
+    int s2len = (int)strlen(s2);
+    
+    /* Handle empty strings */
+    if (s1len == 0) return s2len;
+    if (s2len == 0) return s1len;
+    
+    /* Limit max distance to prevent excessive computation */
+    if (s1len > 100 || s2len > 100) {
+        s1len = 100;
+        s2len = 100;
+    }
     
     /* Allocate matrix on stack */
-    int matrix[s1len + 1][s2len + 1];
+    int matrix[101][101];
     
     /* Initialize first row and column */
     matrix[0][0] = 0;
-    for (x = 1; x <= s1len; x++) matrix[x][0] = matrix[x - 1][0] + 1;
-    for (y = 1; y <= s2len; y++) matrix[0][y] = matrix[0][y - 1] + 1;
+    for (int x = 1; x <= s1len; x++) matrix[x][0] = x;
+    for (int y = 1; y <= s2len; y++) matrix[0][y] = y;
 
     /* Fill in the rest of the matrix */
-    for (x = 1; x <= s1len; x++) {
-        for (y = 1; y <= s2len; y++) {
+    for (int x = 1; x <= s1len; x++) {
+        for (int y = 1; y <= s2len; y++) {
+            int cost = (s1[x - 1] == s2[y - 1]) ? 0 : 1;
             matrix[x][y] = MIN3(
                 matrix[x - 1][y] + 1,           /* deletion */
                 matrix[x][y - 1] + 1,           /* insertion */
-                matrix[x - 1][y - 1] + (s1[x - 1] == s2[y - 1] ? 0 : 1) /* substitution */
+                matrix[x - 1][y - 1] + cost    /* substitution */
             );
         }
     }
     return matrix[s1len][s2len];
 }
 
+/* Convert string to lowercase safely */
+static void to_lower_copy(const char *src, char *dest, size_t max_len) {
+    if (!src || !dest) return;
+    
+    size_t len = strlen(src);
+    if (len >= max_len) len = max_len - 1;
+    
+    for (size_t i = 0; i < len; i++) {
+        dest[i] = (char)tolower((unsigned char)src[i]);
+    }
+    dest[len] = '\0';
+}
+
 /* Check if two strings are similar (within tolerance) */
 int ai_fuzzy_match(const char *input, const char *target) {
     if (!input || !target) return 0;
     
+    /* Empty check */
+    if (strlen(input) == 0 || strlen(target) == 0) return 0;
+    
     /* Exact match */
     if (strcmp(input, target) == 0) return 1;
     
-    /* Case-insensitive match */
+    /* Allocate lowercase copies */
     char input_lower[256];
     char target_lower[256];
-    strncpy(input_lower, input, 255);
-    strncpy(target_lower, target, 255);
-    input_lower[255] = '\0';
-    target_lower[255] = '\0';
     
-    /* Convert to lowercase */
-    for (int i = 0; input_lower[i]; i++) input_lower[i] = (char)tolower(input_lower[i]);
-    for (int i = 0; target_lower[i]; i++) target_lower[i] = (char)tolower(target_lower[i]);
+    to_lower_copy(input, input_lower, sizeof(input_lower));
+    to_lower_copy(target, target_lower, sizeof(target_lower));
     
+    /* Case-insensitive exact match */
     if (strcmp(input_lower, target_lower) == 0) return 1;
     
-    /* Fuzzy match with tolerance */
+    /* Fuzzy match with tolerance based on target length */
     int distance = ai_fuzzy_distance(input_lower, target_lower);
+    if (distance < 0) return 0;
     
-    /* Allow up to 2 character differences for short words,
-       proportionally more for longer words */
     int tolerance = 2;
-    if (strlen(target) > 5) tolerance = 3;
-    if (strlen(target) > 10) tolerance = 4;
+    size_t target_len = strlen(target);
+    if (target_len > 5) tolerance = 3;
+    if (target_len > 10) tolerance = 4;
+    if (target_len > 15) tolerance = 5;
     
     return (distance <= tolerance) ? 1 : 0;
 }

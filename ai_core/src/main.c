@@ -1,6 +1,6 @@
 /* ============================================================
    OS-MINI AI - Main Entry Point
-   Enhanced with Context-Aware Intelligence
+   Enhanced with Context-Aware Intelligence & Self-Repair
    ============================================================ */
 #include <stdio.h>
 #include <string.h>
@@ -24,7 +24,7 @@ void print_banner(void) {
     printf("╔═══════════════════════════════════════════════════════════════╗\n");
     printf("║           OS-MINI AI OMEGA v1.0.0                         ║\n");
     printf("║           Multi-Domain Intelligence System                  ║\n");
-    printf("║           Powered by CodeAgent & Fuzzy Logic              ║\n");
+    printf("║           Powered by CodeAgent & Self-Repair             ║\n");
     printf("╚═══════════════════════════════════════════════════════════════╝\n");
     printf(RESET);
 }
@@ -44,6 +44,7 @@ void print_menu(void) {
     printf(CYAN "  [10]" RESET " Destiny        - Masa depan & takdir\n");
     printf(CYAN "  [11]" RESET " IoT Status     - Cek status semua device\n");
     printf(YELLOW "  [12]" RESET " Context Info   - Lihat konteks & sentiment\n");
+    printf(BOLD GREEN "  [13]" RESET " Self-Repair    - Auto fix bug & health check\n");
     printf(BOLD RED "  [0]" RESET " Exit\n");
     printf(BOLD GREEN "\n>>> " RESET);
 }
@@ -380,6 +381,133 @@ void handle_context_info(void) {
     printf(GREEN "AI Prediction: %s\n" RESET, prediction);
 }
 
+/* Handle Self-Repair */
+void handle_self_repair(void) {
+    int submenu;
+    char input[MAX_INPUT];
+    char output[MAX_OUTPUT];
+    
+    while (1) {
+        printf(BOLD GREEN "\n═══ SELF-REPAIR SYSTEM ===" RESET "\n");
+        printf(BLUE "  [1]" RESET " Health Check     - Cek kondisi sistem\n");
+        printf(BLUE "  [2]" RESET " Run Diagnostics  - Jalankan diagnosa lengkap\n");
+        printf(BLUE "  [3]" RESET " View Errors      - Lihat semua error\n");
+        printf(BLUE "  [4]" RESET " Auto-Fix         - Perbaiki error otomatis\n");
+        printf(BLUE "  [5]" RESET " Analyze Error    - Analisis error tertentu\n");
+        printf(BLUE "  [6]" RESET " Restore Backup   - Pulihkan dari backup\n");
+        printf(BLUE "  [7]" RESET " Clear Errors     - Hapus log error\n");
+        printf(BLUE "  [8]" RESET " Simulate Error   - Uji deteksi error\n");
+        printf(BOLD RED "  [0]" RESET " Back\n");
+        printf(BOLD GREEN "\n>>> " RESET);
+        
+        if (scanf("%d", &submenu) != 1) {
+            printf(RED "Invalid input!\n" RESET);
+            break;
+        }
+        getchar();
+        
+        if (submenu == 0) break;
+        
+        switch(submenu) {
+            case 1: /* Health Check */
+                printf(CYAN "\n=== HEALTH CHECK ===" RESET "\n");
+                ai_self_repair_get_health_status(output, MAX_OUTPUT);
+                printf(GREEN "%s\n" RESET, output);
+                break;
+                
+            case 2: /* Run Diagnostics */
+                printf(CYAN "\n=== RUNNING DIAGNOSTICS ===" RESET "\n");
+                ai_self_repair_run_diagnostics(output, MAX_OUTPUT);
+                printf(GREEN "%s\n" RESET, output);
+                break;
+                
+            case 3: /* View Errors */
+                printf(CYAN "\n=== ERROR LIST ===" RESET "\n");
+                int error_count = ai_self_repair_get_error_count();
+                int unfixed = ai_self_repair_get_unfixed_count();
+                printf("Total Errors: %d\n", error_count);
+                printf("Unfixed: %d\n", unfixed);
+                if (error_count > 0 && unfixed > 0) {
+                    printf("\nKetik nomor error untuk analisis: ");
+                    int err_id;
+                    scanf("%d", &err_id);
+                    getchar();
+                    ai_self_repair_analyze_error(err_id, output, MAX_OUTPUT);
+                    printf(GREEN "%s\n" RESET, output);
+                }
+                break;
+                
+            case 4: /* Auto-Fix */
+                printf(CYAN "\n=== AUTO-FIX ===" RESET "\n");
+                int unfixed_count = ai_self_repair_get_unfixed_count();
+                if (unfixed_count > 0) {
+                    printf("Mencoba memperbaiki %d error...\n", unfixed_count);
+                    /* Auto-fix all unfixed errors */
+                    for (int i = 1; i <= error_count; i++) {
+                        ai_self_repair_auto_fix(i);
+                    }
+                    printf(GREEN "Auto-fix selesai!\n" RESET);
+                } else {
+                    printf(YELLOW "Tidak ada error yang perlu diperbaiki.\n" RESET);
+                }
+                break;
+                
+            case 5: /* Analyze Error */
+                printf(CYAN "\n=== ANALYZE ERROR ===" RESET "\n");
+                printf("Masukkan ID error: ");
+                int analyze_id;
+                scanf("%d", &analyze_id);
+                getchar();
+                ai_self_repair_analyze_error(analyze_id, output, MAX_OUTPUT);
+                printf(GREEN "%s\n" RESET, output);
+                break;
+                
+            case 6: /* Restore Backup */
+                printf(CYAN "\n=== RESTORE BACKUP ===" RESET "\n");
+                printf("Mencoba memulihkan dari backup...\n");
+                int restore_result = ai_self_repair_restore_backup();
+                if (restore_result == 0) {
+                    printf(GREEN "Berhasil memulihkan dari backup!\n" RESET);
+                } else {
+                    printf(RED "Gagal memulihkan - backup tidak ditemukan.\n" RESET);
+                }
+                break;
+                
+            case 7: /* Clear Errors */
+                printf(CYAN "\n=== CLEAR ERRORS ===" RESET "\n");
+                printf("Yakin ingin menghapus semua log error? (y/n): ");
+                char confirm;
+                scanf("%c", &confirm);
+                getchar();
+                if (confirm == 'y' || confirm == 'Y') {
+                    ai_self_repair_clear_errors();
+                    printf(GREEN "Log error berhasil dihapus.\n" RESET);
+                } else {
+                    printf(YELLOW "Dibatalkan.\n" RESET);
+                }
+                break;
+                
+            case 8: /* Simulate Error */
+                printf(CYAN "\n=== SIMULATE ERROR ===" RESET "\n");
+                printf("Kategori (MEMORY, IO, AI, SYSTEM): ");
+                fgets(input, MAX_INPUT, stdin);
+                input[strcspn(input, "\n")] = 0;
+                printf("Pesan error: ");
+                fgets(output, MAX_OUTPUT, stdin);
+                output[strcspn(output, "\n")] = 0;
+                ai_self_repair_simulate_error(input, output);
+                printf(GREEN "Error simulasi berhasil dicatat.\n" RESET);
+                break;
+                
+            default:
+                printf(RED "Pilihan tidak valid!\n" RESET);
+        }
+        
+        printf(YELLOW "\nTekan Enter untuk lanjut..." RESET);
+        getchar();
+    }
+}
+
 /* Main function */
 int main(int argc, char *argv[]) {
     int choice;
@@ -390,6 +518,9 @@ int main(int argc, char *argv[]) {
     ai_log_session_start();
     ai_persistence_load();
     ai_billing_init_session();
+    
+    /* Initialize Self-Repair system */
+    ai_self_repair_init();
     
     /* Check for command-line mode */
     if (argc > 1) {
@@ -426,7 +557,8 @@ int main(int argc, char *argv[]) {
     printf("  ✅ Multi-language Detection\n");
     printf("  ✅ Sentiment Analysis\n");
     printf("  ✅ Long-term Memory\n");
-    printf("  ✅ IoT Control\n\n");
+    printf("  ✅ IoT Control\n");
+    printf("  ✅ Self-Repair System\n\n");
     
     while (1) {
         print_menu();
@@ -474,6 +606,9 @@ int main(int argc, char *argv[]) {
             case 12:
                 handle_context_info();
                 break;
+            case 13:
+                handle_self_repair();
+                break;
             case 0:
                 printf(GREEN "\nTerima kasih telah menggunakan OS-Mini AI!\n" RESET);
                 printf(CYAN "Keep Learning, Keep Innovating! 🚀\n" RESET);
@@ -490,3 +625,4 @@ int main(int argc, char *argv[]) {
     ai_persistence_save();
     return 0;
 }
+

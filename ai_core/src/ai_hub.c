@@ -5,7 +5,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "../include/ai_hub.h"
+
+/* Forward declaration for IoT controller */
+int ai_iot_process(const char *device, const char *data, char *resp);
 
 /* Main Hub Function - routes to appropriate AI module */
 int ai_hub_request(const char *domain, const char *input, char *output) {
@@ -273,13 +277,8 @@ int ai_finance_analyze(const char *transaction, char *result) {
     return 0;
 }
 
-/* ============================================================
-   IoT AI Module
-   ============================================================ */
-int ai_iot_process(const char *device, const char *data, char *resp) {
-    /* Redirect to the more comprehensive IoT controller module */
-    return ai_iot_control(data, -1) ? 0 : 0;
-}
+/* Forward declaration for IoT controller - implemented in iot_controller.c */
+
 
 /* ============================================================
    Smart City AI Module

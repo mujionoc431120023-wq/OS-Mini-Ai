@@ -4,28 +4,32 @@
 # ============================================================
 
 CC = gcc
-CFLAGS = -Wall -Wextra -I./ai_core/include -std=c99
+CFLAGS = -Wall -Wextra -I./include -std=c99
 LDFLAGS = -lncurses -lcurl -lpthread
 
-# Source files
-INTELLIGENCE_SRC = ai_core/src/intelligence/blackbox.c \
-                   ai_core/src/intelligence/fuzzy.c \
-                   ai_core/src/intelligence/context.c \
-                   ai_core/src/intelligence/language.c \
-                   ai_core/src/intelligence/sentiment.c \
-                   ai_core/src/intelligence/persistence.c \
-                   ai_core/src/intelligence/iot_controller.c
+# Source files - intelligence modules
+INTELLIGENCE_SRC = src/intelligence/blackbox.c \
+                   src/intelligence/fuzzy.c \
+                   src/intelligence/context.c \
+                   src/intelligence/language.c \
+                   src/intelligence/sentiment.c \
+                   src/intelligence/persistence.c \
+                   src/intelligence/iot_controller.c \
+                   src/intelligence/self_repair.c
 
-UTILS_SRC = ai_core/src/utils/security.c \
-            ai_core/src/utils/cloud_sync.c \
-            ai_core/src/utils/ota_update.c \
-            ai_core/src/utils/face_auth.c \
-            ai_core/src/utils/billing.c
+# Source files - utility modules
+UTILS_SRC = src/utils/security.c \
+            src/utils/cloud_sync.c \
+            src/utils/ota_update.c \
+            src/utils/face_auth.c \
+            src/utils/billing.c
 
-CORE_SRC = ai_core/src/ai_hub.c \
-           ai_core/src/codeagent.c
+# Source files - core modules
+CORE_SRC = src/ai_hub.c \
+           src/codeagent.c
 
-MAIN_SRC = ai_core/src/main.c
+# Main entry point
+MAIN_SRC = src/main.c
 
 # Object files
 OBJ = $(INTELLIGENCE_SRC:.c=.o) $(UTILS_SRC:.c=.o) $(CORE_SRC:.c=.o)
@@ -39,7 +43,10 @@ all: $(TARGET)
 # Link executable
 $(TARGET): $(OBJ) $(MAIN_SRC)
 	$(CC) $(MAIN_SRC) $(OBJ) -o $(TARGET) $(LDFLAGS)
-	@echo "Build successful! Run with: ./$(TARGET)"
+	@echo "=========================================="
+	@echo "Build successful!"
+	@echo "Run with: ./$(TARGET)"
+	@echo "=========================================="
 
 # Compile object files
 %.o: %.c
@@ -70,3 +77,4 @@ help:
 	@echo "  help    - Show this help"
 
 .PHONY: all clean setup run help
+
